@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { API_URL } from "../config";
 
 function Contact() {
   const [formData, setFormData] = useState({
@@ -20,7 +21,7 @@ function Contact() {
     setSending(true);
 
     try {
-      const response = await fetch("http://localhost:5000/api/contact/send-message", {
+      const response = await fetch(`${API_URL}/api/contact/send-message`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
@@ -30,7 +31,7 @@ function Contact() {
 
       if (response.ok) {
         setStatusOk(true);
-        setStatusMessage("Message sent. A confirmation email is on its way to your inbox.");
+        setStatusMessage("Message sent. We'll get back to you by email.");
         setFormData({ name: "", email: "", subject: "", message: "" });
       } else {
         setStatusOk(false);

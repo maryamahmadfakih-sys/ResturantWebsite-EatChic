@@ -1,4 +1,5 @@
 import React, { createContext, useState } from "react";
+import { API_URL } from "../config";
 
 export const cartContext = createContext();
 
@@ -48,7 +49,7 @@ export const CartProvider = ({ children }) => {
     );
 
     try {
-      const response = await fetch("http://localhost:5000/api/orders", {
+      const response = await fetch(`${API_URL}/api/orders`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -68,7 +69,7 @@ export const CartProvider = ({ children }) => {
       }
     } catch (error) {
       console.error("Checkout Error:", error);
-      alert("Server error. Ensure your backend is running on port 5000.");
+      alert("Can't reach the server right now. Please try again in a minute.");
       return null;
     }
   };

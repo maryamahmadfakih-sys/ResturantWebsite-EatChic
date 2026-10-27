@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import roomImg from "../images/img2.jpg";
+import { API_URL } from "../config";
 
 function Login() {
   // Mode options: "login", "signup", "reset"
@@ -8,6 +9,7 @@ function Login() {
     name: "",
     email: "",
     password: "",
+    newPassword: "",
   });
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -22,16 +24,20 @@ function Login() {
     setError("");
 
     // Determine target URL based on current mode
-    let url = "http://localhost:5000/api/auth/login";
+    let url = `${API_URL}/api/auth/login`;
     if (mode === "signup") {
-      url = "http://localhost:5000/api/auth/signup";
+      url = `${API_URL}/api/auth/signup`;
     } else if (mode === "reset") {
-      url = "http://localhost:5000/api/auth/reset-password";
+      url = `${API_URL}/api/auth/reset-password`;
     }
 
     const payload =
       mode === "reset"
-        ? { email: formData.email, newPassword: formData.password }
+        ? {
+            email: formData.email,
+            currentPassword: formData.password,
+            newPassword: formData.newPassword,
+          }
         : formData;
 
     try {
@@ -43,7 +49,7 @@ function Login() {
 
       const contentType = response.headers.get("content-type");
       if (!contentType || !contentType.includes("application/json")) {
-        throw new Error("Backend server on port 5000 is not responding properly.");
+        throw new Error("Can't reach the server right now. Please try again in a minute.");
       }
 
       const data = await response.json();
@@ -53,7 +59,7 @@ function Login() {
       }
 
       if (mode === "reset") {
-        setMessage("Password updated successfully! Redirecting to login...");
+        setMessage("Password updated. Taking you back to sign in…");
         setTimeout(() => {
           setMode("login");
           setMessage("");
@@ -96,14 +102,14 @@ function Login() {
             {mode === "signup"
               ? "Create an account"
               : mode === "reset"
-              ? "Reset your password"
+              ? "Change your password"
               : "Welcome back"}
           </h1>
           <p>
             {mode === "signup"
               ? "Sign up to start ordering your favorite meals."
               : mode === "reset"
-              ? "Enter your email and choose a new password."
+              ? "Enter your email, your current password and a new one."
               : "Sign in to your account to place an order."}
           </p>
 
@@ -144,7 +150,7 @@ function Login() {
 
             <div className="field">
               <label htmlFor="l-password">
-                {mode === "reset" ? "New password" : "Password"}
+                {mode === "reset" ? "Current password" : "Password"}
               </label>
               <input
                 id="l-password"
@@ -154,9 +160,27 @@ function Login() {
                 required
                 value={formData.password}
                 onChange={handleChange}
-                autoComplete={mode === "login" ? "current-password" : "new-password"}
+                minLength={mode === "signup" ? 8 : undefined}
+                autoComplete={mode === "signup" ? "new-password" : "current-password"}
               />
             </div>
+
+            {mode === "reset" && (
+              <div className="field">
+                <label htmlFor="l-new-password">New password</label>
+                <input
+                  id="l-new-password"
+                  className="input"
+                  type="password"
+                  name="newPassword"
+                  required
+                  minLength={8}
+                  value={formData.newPassword}
+                  onChange={handleChange}
+                  autoComplete="new-password"
+                />
+              </div>
+            )}
 
             <button type="submit" className="btn btn-primary btn-block">
               {mode === "signup"
@@ -171,7 +195,7 @@ function Login() {
             {mode === "login" && (
               <>
                 <button type="button" className="btn-link" onClick={() => switchMode("reset")}>
-                  Forgot your password?
+                  Change your password
                 </button>
                 <br />
                 New here?{" "}

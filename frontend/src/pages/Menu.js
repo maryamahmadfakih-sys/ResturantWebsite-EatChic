@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from "react";
 import { Link } from "react-router-dom";
 import { cartContext } from "../Components/CartContext";
 import { imageMap } from "../Components/imageMap";
+import { API_URL } from "../config";
 
 const initialMenuItems = [
   { id: 1, name: "Spring Rolls", price: 5.99, category: "Appetizers" },
@@ -87,7 +88,7 @@ function Menu({ preview = false }) {
   const { addToCart } = useContext(cartContext);
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/menu")
+    fetch(`${API_URL}/api/menu`)
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data) && data.length > 0) {

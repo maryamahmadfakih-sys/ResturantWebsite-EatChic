@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
+import { API_URL } from "../config";
 
 
 const STAGES = [
@@ -27,7 +28,7 @@ function OrderTracker() {
   if (!id) return;
   setLoading(true);
   try {
-    const res = await fetch(`http://localhost:5000/api/orders/${id}`);
+    const res = await fetch(`${API_URL}/api/orders/${id}`);
     if (res.ok) {
       const data = await res.json();
 
