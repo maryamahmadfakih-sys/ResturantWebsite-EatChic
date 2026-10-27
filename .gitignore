@@ -1,0 +1,17 @@
+# Dependencies
+node_modules/
+
+# Secrets: never upload passwords or email logins
+.env
+.env.*
+!.env.example
+
+# Build output
+frontend/build/
+
+# Logs and system files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.DS_Store
+Thumbs.db
