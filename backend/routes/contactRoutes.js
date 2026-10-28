@@ -3,7 +3,7 @@ const router = express.Router();
 const sendEmail = require("../utils/sendEmail");
 
 // Where contact messages are delivered. Set CONTACT_TO to change it.
-const CONTACT_TO = process.env.CONTACT_TO || "42130811@students.liu.edu.lb";
+const CONTACT_TO = process.env.CONTACT_TO || "maryamahmadfakih@gmail.com";
 
 // Stop visitors from injecting HTML into the email
 const escapeHtml = (text = "") =>
