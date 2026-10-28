@@ -68,7 +68,7 @@ function Contact() {
               </div>
               <div className="detail">
                 <dt>Email</dt>
-                <dd><a href="mailto:42130811@students.liu.edu.lb">42130811@students.liu.edu.lb</a></dd>
+                <dd><a href="mailto:maryamahmadfakih@gmail.com">maryamahmadfakih@gmail.com</a></dd>
               </div>
               <div className="detail">
                 <dt>Hours</dt>

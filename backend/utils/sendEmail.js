@@ -1,31 +1,30 @@
 const nodemailer = require("nodemailer");
 
 // Two ways to send email:
-// 1. BREVO_API_KEY set  -> Brevo's HTTPS API. Use this on hosts that block
-//    email ports, like Render's free tier.
-// 2. Otherwise          -> Gmail through Nodemailer (fine on your own computer).
-const FROM_EMAIL = process.env.EMAIL_FROM || process.env.EMAIL_USER;
+// 1. RESEND_API_KEY set -> Resend (used on Render, which blocks Gmail).
+//    Without your own domain it can only send to your Resend account email.
+// 2. Otherwise          -> Gmail through Nodemailer (works on your own computer).
 const FROM_NAME = "Eat Chic";
 
-const sendWithBrevo = async (to, subject, htmlContent) => {
-  const res = await fetch("https://api.brevo.com/v3/smtp/email", {
+const sendWithResend = async (to, subject, htmlContent) => {
+  const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: {
-      "api-key": process.env.BREVO_API_KEY,
+      Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
       "Content-Type": "application/json",
-      accept: "application/json",
+      "User-Agent": "eat-chic-backend",
     },
     body: JSON.stringify({
-      sender: { name: FROM_NAME, email: FROM_EMAIL },
-      to: [{ email: to }],
+      from: `${FROM_NAME} <onboarding@resend.dev>`,
+      to: [to],
       subject,
-      htmlContent,
+      html: htmlContent,
     }),
   });
   if (!res.ok) {
-    throw new Error(`Brevo responded ${res.status}: ${await res.text()}`);
+    throw new Error(`Resend responded ${res.status}: ${await res.text()}`);
   }
-  return (await res.json()).messageId;
+  return (await res.json()).id;
 };
 
 const sendWithGmail = async (to, subject, htmlContent) => {
@@ -34,7 +33,7 @@ const sendWithGmail = async (to, subject, htmlContent) => {
     auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
   });
   const info = await transporter.sendMail({
-    from: `"${FROM_NAME}" <${FROM_EMAIL}>`,
+    from: `"${FROM_NAME}" <${process.env.EMAIL_USER}>`,
     to,
     subject,
     html: htmlContent,
@@ -44,8 +43,8 @@ const sendWithGmail = async (to, subject, htmlContent) => {
 
 const sendEmail = async (to, subject, htmlContent) => {
   try {
-    const id = process.env.BREVO_API_KEY
-      ? await sendWithBrevo(to, subject, htmlContent)
+    const id = process.env.RESEND_API_KEY
+      ? await sendWithResend(to, subject, htmlContent)
       : await sendWithGmail(to, subject, htmlContent);
     console.log("Email sent successfully:", id);
     return true;
