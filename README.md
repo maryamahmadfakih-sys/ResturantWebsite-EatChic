@@ -43,7 +43,7 @@ A full-stack restaurant ordering website. Customers can browse a 50-dish menu of
 | Backend | Node.js, Express 5 |
 | Database | MySQL with Sequelize |
 | Auth | bcrypt and JSON Web Tokens |
-| Email | Nodemailer (Gmail) or Brevo API |
+| Email | Nodemailer (Gmail) or Resend API |
 | Hosting | Clever Cloud (one app plus a MySQL add-on) |
 
 ## Project structure
