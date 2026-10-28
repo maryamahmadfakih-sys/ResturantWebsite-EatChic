@@ -1,0 +1,10 @@
+{
+  "name": "eat-chic",
+  "private": true,
+  "description": "Eat Chic restaurant website: one server for the website and the API",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "postinstall": "npm install --prefix backend && npm install --prefix frontend && cd frontend && CI=false npm run build",
+    "start": "node backend/server.js"
+  }
+}

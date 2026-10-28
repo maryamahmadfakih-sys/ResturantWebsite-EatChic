@@ -5,11 +5,20 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 
 const JWT_SECRET = process.env.JWT_SECRET || "super_secret_key_12345";
+if (!process.env.JWT_SECRET) {
+  console.warn("JWT_SECRET is not set. Using the built-in development secret; set JWT_SECRET in production.");
+}
 
-// 1. SIGNUP -> POST http://localhost:5000/api/auth/signup
+// 1. SIGNUP -> POST /api/auth/signup
 router.post("/signup", async (req, res) => {
   try {
     const { name, email, password } = req.body;
+    if (!name || !email || !password) {
+      return res.status(400).json({ message: "Name, email and password are required." });
+    }
+    if (password.length < 8) {
+      return res.status(400).json({ message: "Your password must be at least 8 characters." });
+    }
     const existingUser = await User.findOne({ where: { email } });
 
     if (existingUser) {
@@ -32,7 +41,7 @@ router.post("/signup", async (req, res) => {
   }
 });
 
-// 2. LOGIN -> POST http://localhost:5000/api/auth/login
+// 2. LOGIN -> POST /api/auth/login
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -58,28 +67,33 @@ router.post("/login", async (req, res) => {
   }
 });
 
-// 3. RESET PASSWORD -> POST http://localhost:5000/api/auth/reset-password
+// 3. CHANGE PASSWORD -> POST /api/auth/reset-password
+// Requires the current password, so nobody can take over an account
+// just by knowing its email address.
 router.post("/reset-password", async (req, res) => {
   try {
-    const { email, newPassword } = req.body;
+    const { email, currentPassword, newPassword } = req.body;
 
-    if (!email || !newPassword) {
-      return res.status(400).json({ message: "Email and new password are required." });
+    if (!email || !currentPassword || !newPassword) {
+      return res.status(400).json({ message: "Email, current password and new password are required." });
+    }
+    if (newPassword.length < 8) {
+      return res.status(400).json({ message: "Your new password must be at least 8 characters." });
     }
 
     const user = await User.findOne({ where: { email } });
-    if (!user) {
-      return res.status(404).json({ message: "No account found with this email." });
+    const isMatch = user && (await bcrypt.compare(currentPassword, user.password));
+    if (!isMatch) {
+      return res.status(400).json({ message: "Email or current password is incorrect." });
     }
 
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
-    user.password = hashedPassword;
+    user.password = await bcrypt.hash(newPassword, 10);
     await user.save();
 
-    return res.json({ message: "Password updated successfully! You can now log in." });
+    return res.json({ message: "Password updated. You can now sign in with your new password." });
   } catch (err) {
-    console.error("Reset password error:", err);
-    return res.status(500).json({ message: "Server error resetting password." });
+    console.error("Change password error:", err);
+    return res.status(500).json({ message: "Server error changing password." });
   }
 });
 

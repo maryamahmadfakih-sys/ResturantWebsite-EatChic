@@ -2,6 +2,13 @@ const express = require("express");
 const router = express.Router();
 const sendEmail = require("../utils/sendEmail");
 
+// Where contact messages are delivered. Set CONTACT_TO to change it.
+const CONTACT_TO = process.env.CONTACT_TO || "42130811@students.liu.edu.lb";
+
+// Stop visitors from injecting HTML into the email
+const escapeHtml = (text = "") =>
+  String(text).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
 router.post("/send-message", async (req, res) => {
   try {
     const { name, email, subject, message } = req.body;
@@ -16,18 +23,24 @@ router.post("/send-message", async (req, res) => {
 
     // 3. Send email to your student inbox (Safely wrapped)
     try {
+      const safe = {
+        name: escapeHtml(name),
+        email: escapeHtml(email),
+        subject: escapeHtml(subject),
+        message: escapeHtml(message).replace(/\n/g, "<br />"),
+      };
       await sendEmail(
-        "42130811@students.liu.edu.lb", 
+        CONTACT_TO,
         `New Website Contact Form: ${subject || "No Subject"}`,
         `
           <h2>New Contact Form Message</h2>
-          <p><strong>From:</strong> ${name}</p>
-          <p><strong>User's Email:</strong> ${email}</p>
-          <p><strong>Subject:</strong> ${subject || "N/A"}</p>
+          <p><strong>From:</strong> ${safe.name}</p>
+          <p><strong>User's Email:</strong> ${safe.email}</p>
+          <p><strong>Subject:</strong> ${safe.subject || "N/A"}</p>
           <hr />
           <p><strong>Message:</strong></p>
-          <p style="background-color: #f4f6f8; padding: 12px; border-left: 4px solid #3e3c94;">
-            ${message}
+          <p style="background-color: #f4f6f8; padding: 12px; border-left: 4px solid #4F5B2A;">
+            ${safe.message}
           </p>
         `
       );

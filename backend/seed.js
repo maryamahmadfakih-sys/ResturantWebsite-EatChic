@@ -3,8 +3,8 @@ dotenv.config();
 
 const { sequelize } = require("./db");
 const MenuItem = require("./models/MenuItem");
-const User = require("./models/User"); // Import User model
-const bcrypt = require("bcryptjs");
+require("./models/User"); // make sure the users table is created
+require("./models/Order"); // and the orders table
 
 const menuItems = [
   { id: 1, name: "Spring Rolls", price: 5.99, category: "Appetizers", Image: "springRolls.jpg" },
@@ -61,21 +61,14 @@ const menuItems = [
 
 const seedDB = async () => {
   try {
-    // Re-creates tables automatically in MySQL
+    // WARNING: force: true DELETES all tables (menu, users, orders) and recreates them.
+    // Run this only once, on an empty database.
     await sequelize.sync({ force: true });
 
     // Seed Menu Items
     await MenuItem.bulkCreate(menuItems);
 
-    // Seed Default User
-    const hashedPassword = await bcrypt.hash("12345678", 10);
-    await User.create({
-      name: "Mariam Fakih",
-      email: "mariamahmadfakih2004@gmail.com",
-      password: hashedPassword,
-    });
-
-    console.log("MySQL Database seeded with Menu Items AND User successfully!");
+    console.log("MySQL Database seeded with menu items. Create accounts from the sign-up page.");
     process.exit();
   } catch (error) {
     console.error("Seeding failed:", error);
